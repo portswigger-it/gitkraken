@@ -26,5 +26,28 @@ jobs:
         unzip temp.zip
         rm temp.zip
     
-    - name: List all the files
-      run: ls -l
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Load, tag, and push image to Amazon ECR
+      id: load-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker load -i gk-enterprise-controller.tar
+        docker load -i gk-kafka.tar
+        docker load -i gk-mongo.tar
+        docker load -i gk-services.tar
+        docker load -i gk-zookeeper.tar
+        docker images
+        # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
