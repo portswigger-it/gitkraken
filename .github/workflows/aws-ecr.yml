@@ -44,11 +44,16 @@ jobs:
       run: |
         docker load -i gk-enterprise-controller.tar
         docker load -i gk-kafka.tar
-        docker load -i gk-mongo.tar
+        #docker load -i gk-mongo.tar
         docker load -i gk-services.tar
         docker load -i gk-zookeeper.tar
         docker images
         docker tag gk-enterprise-controller:production $ECR_REGISTRY/gk-enterprise-controller:$IMAGE_TAG
+        docker tag gk-kafka:production $ECR_REGISTRY/gk-kafka:$IMAGE_TAG
+        docker tag gk-services:production $ECR_REGISTRY/gk-services:$IMAGE_TAG
+        docker tag gk-zookeeper:production $ECR_REGISTRY/gk-zookeeper:$IMAGE_TAG
         docker push $ECR_REGISTRY/gk-enterprise-controller:$IMAGE_TAG
-        # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gk-kafka:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gk-services:$IMAGE_TAG
+        docker push $ECR_REGISTRY/gk-zookeeper:$IMAGE_TAG
         echo "GitKraken server deployed to ECR with version number: $IMAGE_TAG"
