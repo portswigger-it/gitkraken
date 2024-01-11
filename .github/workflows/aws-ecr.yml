@@ -5,7 +5,6 @@ on:
 
 env:
   AWS_REGION: eu-west-1
-  ECR_REPOSITORY: gitkraken-server
 
 permissions:
   contents: read
@@ -49,5 +48,6 @@ jobs:
         docker load -i gk-services.tar
         docker load -i gk-zookeeper.tar
         docker images
+        docker tag gk-enterprise-controller:production $ECR_REGISTRY/gk-enterprise-controller:$IMAGE_TAG
         # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "GitKraken server deployed to ECR with version number: $IMAGE_TAG" >> $GITHUB_OUTPUT
