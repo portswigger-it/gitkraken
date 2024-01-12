@@ -1,0 +1,42 @@
+name: Image Release
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image-release:
+    name: Image Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download and unzip latest release
+        run: |
+          wget -q -O GitKrakenEnterpriseServer.zip https://release.gitkraken.com/enterprise/GitKrakenEnterpriseServer.zip
+          unzip GitKrakenEnterpriseServer.zip
+          rm GitKrakenEnterpriseServer.zip
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Load, tag, and push image to GHCR
+        run: |
+
+          IMAGE_TAG=$(head -n 1 versionInfo | sed 's/.*\ //' | tr -d 'v+')
+
+          docker load -i gk-enterprise-controller.tar
+          docker tag gk-enterprise-controller:production ghcr.io/${{ github.repository_owner }}/gk-enterprise-controller:$IMAGE_TAG
+          docker push ghcr.io/${{ github.repository_owner }}/gk-enterprise-controller:$IMAGE_TAG
+
+          docker load -i gk-services.tar
+          docker tag gk-services:production ghcr.io/${{ github.repository_owner }}/gk-services:$IMAGE_TAG
+          docker push ghcr.io/${{ github.repository_owner }}/gk-services:$IMAGE_TAG
